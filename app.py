@@ -1,13 +1,13 @@
+import pandas as pd
 import streamlit as st
 import joblib
 import neattext.functions as nfx
+from catboost import Pool
 
 
 def read_model():
     model = joblib.load('catboost.sav')
-    vector = joblib.load('tfidf.sav')
-
-    return model, vector
+    return model
 
 
 def preprocess(lyrics):
@@ -42,10 +42,11 @@ def predict():
 
     if st.button('Predict'):
 
-        model, vector = read_model()
+        model = read_model()
 
-        vectorized = vector.transform([lyrics])
-        result = model.predict(vectorized)
+        df_data = pd.DataFrame([lyrics], columns=['lyrics'])
+        data = Pool(data=df_data, text_features=['lyrics'])
+        result = model.predict(data)
 
         decode = {'Rock': 0, 'Pop': 1, 'Metal': 2, 'Jazz': 3}
 
